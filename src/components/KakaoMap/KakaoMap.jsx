@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import { getUserLocation } from '../../utils/getUserLocation';
-import { useRef } from 'react';
 import MyLocationMarker from './MyLocationMarker';
 import MapProductMarker from './MapProductMarker';
+import { MODE } from '../../constants/constants';
+import { useKakaoGeocoder } from '../../hooks/useKakaoGeocoder';
 
-const KakaoMap = ({ level, mode, productList, selectedProduct }) => {
+const KakaoMap = ({
+  level,
+  mode,
+  productList,
+  selectedProduct,
+  onLocationSelect,
+  sendAddress,
+}) => {
   const [location, setLocation] = useState({ lat: null, lng: null }); // 유저의 중심 위치를 위한 상태
   const [productInfo, setProductInfo] = useState(null);
   const [center, setCenter] = useState(location); // 지도의 중심 위치를 위한 상태
+
+  const { addressToCoords, coordsToAddress } = useKakaoGeocoder();
 
   useEffect(() => {
     getUserLocation()
@@ -31,9 +41,56 @@ const KakaoMap = ({ level, mode, productList, selectedProduct }) => {
     }
   }, [selectedProduct, productList]);
 
-  // MapProductModal 닫기 기능
-  const handleClickMap = () => {
-    setProductInfo(null);
+  // 주소 검색 처리
+  useEffect(() => {
+    if (!sendAddress) return;
+    const searchAddress = async (address) => {
+      try {
+        const coords = await addressToCoords(address);
+        if (coords === null) {
+          return alert('주소 검색에 실패했습니다. 다시 시도해주세요.');
+        }
+        if (location.lat !== coords.lat || location.lng !== coords.lng) {
+          setLocation(coords);
+          setCenter(coords);
+        }
+
+        const detailAddr = await coordsToAddress(coords);
+        if (onLocationSelect) onLocationSelect(coords, detailAddr);
+      } catch (error) {
+        console.error('주소 검색 실패', error);
+        return alert('주소 검색에 실패했습니다. 다시 시도해주세요.');
+      }
+    };
+    searchAddress(sendAddress);
+  }, [sendAddress, addressToCoords, coordsToAddress, onLocationSelect]);
+
+  // 지도 클릭 핸들러
+  // mode: PRODUCTLIST - 상품 목록 모드, LOCATIONPICKER - 위치 선택 모드
+  const handleClickMap = async (_, mouseEvent) => {
+    if (mode === MODE.PRODUCTLIST) {
+      setProductInfo(null);
+    }
+    if (mode === MODE.LOCATIONPICKER) {
+      const latlng = mouseEvent.latLng;
+      const newLocation = {
+        lat: latlng.getLat(),
+        lng: latlng.getLng(),
+      };
+
+      try {
+        const detailAddr = await coordsToAddress(latlng);
+
+        if (onLocationSelect) {
+          onLocationSelect(newLocation, detailAddr);
+        }
+        setLocation(newLocation);
+        setCenter(newLocation);
+      } catch (error) {
+        console.error('주소 변환 실패', error);
+        return alert('주소 변환에 실패했습니다. 다시 시도해주세요.');
+      }
+    }
   };
 
   return (
@@ -44,7 +101,7 @@ const KakaoMap = ({ level, mode, productList, selectedProduct }) => {
         style={{ width: '100%', height: '100%' }}
         onClick={handleClickMap}
       >
-        {mode === 'productList' && (
+        {mode === MODE.PRODUCTLIST && (
           <>
             <MyLocationMarker location={location} />
             <MapProductMarker
@@ -54,6 +111,7 @@ const KakaoMap = ({ level, mode, productList, selectedProduct }) => {
             />
           </>
         )}
+        {mode === MODE.LOCATIONPICKER && <MapMarker position={location} />}
       </Map>
     </div>
   );

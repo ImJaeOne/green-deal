@@ -1,6 +1,11 @@
 import React from 'react';
 
-const Select = ({ value, name, onChange, children }) => {
+const Select = ({
+  value = '',
+  name = '',
+  onChange = () => {},
+  children = null,
+}) => {
   return (
     <select
       value={value}

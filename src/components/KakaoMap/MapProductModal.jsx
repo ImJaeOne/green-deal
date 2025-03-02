@@ -1,5 +1,6 @@
 import { CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { Link } from 'react-router-dom';
+import dayjs from 'dayjs';
 
 const MapProductModal = ({ product, productInfo }) => {
   return (
@@ -12,33 +13,17 @@ const MapProductModal = ({ product, productInfo }) => {
         >
           <Link
             to={`/product/detail/${product.id}`}
-            style={{
-              pointerEvents: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '20px',
-              backgroundColor: '#fff',
-              border: '2px solid rgb(85 204 201)',
-              borderRadius: '15px',
-              color: '#000',
-              textAlign: 'center',
-              minWidth: '120px',
-            }}
+            className="pointer-events-auto flex flex-col items-center justify-center p-5 bg-white border-4 border-[#55CCC9] rounded-xl text-black text-center min-w-[120px] transition-transform duration-200 ease-in-out hover:scale-110"
           >
-            <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
-              {product.name}
-            </div>
-            <div style={{ color: '#666', marginBottom: '5px' }}>
+            <div className="mb-1 font-bold">{product.name}</div>
+            <div className="mb-1 text-gray-600">
               {Number(product.price).toLocaleString()}원
             </div>
-            <div style={{ fontSize: '12px', color: '#888' }}>
-              {product.users.name}{' '}
-              {new Date(product.createdAt)
-                .toISOString()
-                .slice(2, 10)
-                .replace(/-/g, '.')}
+            <div className="text-xs text-gray-500">
+              {[
+                product.users.name,
+                dayjs(product.createdAt).format('YY.MM.DD'),
+              ].join(' ')}
             </div>
           </Link>
         </CustomOverlayMap>

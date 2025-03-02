@@ -1,48 +1,44 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Button from '../common/Button';
+import ProfileImage from './ProfileImage';
+import useProfileInfo from '../../hooks/useProfileInfo';
+import useProfileImage from '../../hooks/useProfileImage';
 
-const ProfileSection = () => {
-  const [nickname, setNickname] = useState('테스트닉네임');
-  const [isUpdating, setIsUpdating] = useState(false);
+const ProfileSection = ({ user }) => {
+  const {
+    userdata,
+    nickname,
+    setNickname,
+    isUpdating,
+    errorMessage,
+    handleProfileUpdate,
+  } = useProfileInfo(user);
+  const { imageUrl, handleImageChange } = useProfileImage(userdata);
 
-  const handleToggleClick = () => {
-    setIsUpdating((prev) => !prev);
-  };
-
-  const handleNicknameChange = (e) => {
-    setNickname(e.target.value);
-  };
   return (
     <div className="flex flex-col items-center justify-center gap-4 w-[300px] h-[458px] px-10 py-[30px] bg-white">
-      <Button
-        type="button"
-        variant="primary"
-        size="medium"
-        onClick={() => console.log('이미지 선택')}
-      >
-        이미지 선택
-      </Button>
-      <img
-        src={null}
-        alt="프로필 이미지"
-        className="object-cover w-[130px] h-[130px] bg-light-gray rounded-full"
-      />
+      <ProfileImage imageUrl={imageUrl} handleImageChange={handleImageChange} />
       {isUpdating ? (
-        <input
-          type="text"
-          value={nickname}
-          onChange={handleNicknameChange}
-          className="w-[210px] h-[32px] border border-dark rounded-md text-center"
-        />
+        <>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value.trim())}
+            className="w-[210px] h-[32px] border border-dark rounded-md text-center"
+          />
+          {errorMessage && (
+            <p className="mt-1 text-text-sm text-point-color">{errorMessage}</p>
+          )}
+        </>
       ) : (
-        <p className="text-title-sm">{nickname}</p>
+        <p className="text-title-sm">{userdata?.name ?? '닉네임'}</p>
       )}
-      <p className="text-title-sm">email@example.com</p>
+      <p className="text-title-sm">{userdata?.email ?? '이메일'}</p>
       <Button
         type="button"
         variant="primary"
         size="large"
-        onClick={handleToggleClick}
+        onClick={handleProfileUpdate}
       >
         {isUpdating ? '프로필 수정 완료' : '프로필 수정'}
       </Button>

@@ -1,30 +1,17 @@
 import React from 'react';
 import Button from '../common/Button';
-import { useEffect } from 'react';
-import { useState } from 'react';
 import { useRef } from 'react';
+import { useImageUpload } from '../../hooks/useImageUpload';
 
-const ProductImageUpload = ({ image, onChangeImage }) => {
-  const [imageUrl, setImageUrl] = useState(null);
+const ProductImageUpload = ({ onChangeImage }) => {
   const fileInputRef = useRef();
-  useEffect(() => {
-    return () => {
-      if (imageUrl) {
-        // blob url 삭제
-        URL.revokeObjectURL(imageUrl);
-        setImageUrl(null);
-      }
-    };
-  }, [imageUrl]);
+  const { imageUrl, setChangeImage, resetImage } = useImageUpload({
+    onChangeImage,
+  });
 
   // 이미지 선택 처리
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // 이미지 저장
-    onChangeImage(file);
-    setImageUrl(URL.createObjectURL(file));
+    setChangeImage(e.target.files[0]);
   };
 
   // 이미지 추가 버튼 클릭 핸들러
