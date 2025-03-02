@@ -2,8 +2,11 @@ import React from 'react';
 import { useState } from 'react';
 import Button from '../components/common/Button';
 import ProfileSection from '../components/mypage/ProfileSection';
+import useUserStore from '../store/userStore';
 
 const MyPage = () => {
+  const user = useUserStore((state) => state.user);
+
   const [currentTab, setCurrentTab] = useState('selling');
   const [products, setProducts] = useState([
     {
@@ -82,9 +85,9 @@ const MyPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen gap-14">
+    <div className="flex items-center justify-center min-h-screen gap-14">
       <section className="flex flex-col items-center justify-center gap-10 w-[400px] h-[830px] p-6 bg-light-gray rounded-md">
-        <ProfileSection />
+        <ProfileSection user={user} />
 
         <div className="w-[300px] h-[210px] rounded-md">
           <button
@@ -149,9 +152,7 @@ const MyPage = () => {
                 />
                 <div className="w-full h-[120px] p-2">
                   <h3 className="font-semibold text-title-sm">{item.name}</h3>
-                  <p className="mb-2 text-gray-500 text-md text-deep-mint">
-                    {item.price}
-                  </p>
+                  <p className="mb-2 text-md text-deep-mint">{item.price}</p>
                   <div className="flex items-center justify-center gap-4">
                     <Button type="button" variant="outline" size="medium">
                       삭제

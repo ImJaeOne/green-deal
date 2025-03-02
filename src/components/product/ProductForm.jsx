@@ -1,7 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
 import Button from '../common/Button';
-import { useEffect } from 'react';
 import ProductMapModal from './ProductMapModal';
 import Label from '../ui/Label';
 import Input from '../common/Input';
@@ -12,82 +10,53 @@ import {
   PRODUCT_QUALITY,
   PRODUCT_REFUND,
 } from '../../constants/productConstants';
+import { useProductForm } from '../../hooks/useProductForm';
+import { useState } from 'react';
+import { useRef } from 'react';
 
 const ProductForm = ({ product, onChangeProduct, onSubmit }) => {
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const { name, price, quality, refund, category, description } = product;
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  // Input ref들
+  const nameInputRef = useRef(null);
+  const priceInputRef = useRef(null);
 
-    let newValue;
-    if (name === 'price') {
-      newValue = Number(value.replace(/[^\d]/g, ''));
-    } else if (name === 'refund') {
-      newValue = JSON.parse(value.toLowerCase());
-    } else {
-      newValue = value;
-    }
-
-    onChangeProduct({
-      [name]: newValue,
-    });
-  };
-
-  useEffect(() => {
-    console.log('변경된 location:', product.location);
-  }, [product.location]);
+  const { address, handleChange, handleSubmit, handleSelectLocation } =
+    useProductForm(product, onChangeProduct);
 
   // 위치 추가 모달 열기
   const openLocationModal = () => {
     setIsLocationModalOpen(true);
-    onChangeProduct({
-      location: JSON.stringify({ lat: 33.450701, lng: 126.570667 }),
-    });
   };
 
-  // 폼 제출 핸들러
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // 필수 필드 검증
-    if (!name.trim()) {
-      alert('판매 물품을 입력하세요');
-      return;
+  // input focus 이벤트 핸들러
+  const autoFocusHandler = () => {
+    console.log(name, price);
+
+    if (!name) {
+      return nameInputRef.current.focus();
     }
     if (!price) {
-      alert('판매 금액을 입력하세요');
-      return;
+      return priceInputRef.current.focus();
     }
-    if (!quality) {
-      alert('물품 상태를 선택하세요');
-      return;
-    }
-    if (refund === '') {
-      alert('교환 가능 여부를 선택하세요');
-      return;
-    }
-    if (!category) {
-      alert('카테고리를 선택하세요');
-      return;
-    }
-    if (!description.trim()) {
-      alert('상품 설명을 입력하세요');
-      return;
-    }
-
-    onSubmit();
   };
 
-  const handleSelectLocation = (location) => {
-    console.log(location);
-  };
   return (
     <>
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          handleSubmit(e);
+          autoFocusHandler();
+          onSubmit();
+        }}
+      >
         {/* 판매물품 */}
         <div>
           <Label>판매 물품</Label>
           <Input
+            ref={nameInputRef}
             type="text"
             value={name}
             name="name"
@@ -104,6 +73,7 @@ const ProductForm = ({ product, onChangeProduct, onSubmit }) => {
               ₩
             </span>
             <Input
+              ref={priceInputRef}
               type="text"
               value={price}
               name="price"
@@ -132,12 +102,12 @@ const ProductForm = ({ product, onChangeProduct, onSubmit }) => {
           <div className="flex-1">
             <Label>교환 가능 여부</Label>
             <Select value={refund} name="refund" onChange={handleChange}>
-              {PRODUCT_REFUND.map((refunc) => (
+              {PRODUCT_REFUND.map((refund) => (
                 <option
-                  value={Object.values(refunc)}
-                  key={Object.values(refunc)}
+                  value={Object.values(refund)}
+                  key={Object.values(refund)}
                 >
-                  {Object.keys(refunc)}
+                  {Object.keys(refund)}
                 </option>
               ))}
             </Select>
@@ -170,8 +140,9 @@ const ProductForm = ({ product, onChangeProduct, onSubmit }) => {
         {/* 거래위치 */}
         <div className="flex items-center justify-between">
           <Label>거래 위치</Label>
+          <span>{address}</span>
           <Button onClick={openLocationModal} variant="outline" size="medium">
-            추가
+            {address ? '변경' : '추가'}
           </Button>
         </div>
 

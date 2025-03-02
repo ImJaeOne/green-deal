@@ -23,7 +23,7 @@ export const INITIAL_ADD_PRODUCT_DATA = {
   location: { lat: null, lng: null },
   description: '',
   img: null,
-  soldout: true,
+  soldout: false,
   updated_at: null,
 };
 

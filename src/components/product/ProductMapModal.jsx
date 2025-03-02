@@ -5,73 +5,28 @@ import {
   Transition,
   TransitionChild,
 } from '@headlessui/react';
-import React, { useEffect, useState, useRef, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import Button from '../common/Button';
+import KakaoMap from '../KakaoMap/KakaoMap';
+import Input from '../common/Input';
+import { useProductMapModal } from '../../hooks/useProductMapModal';
+import { MODE } from '../../constants/constants';
+
+const LOAD_ADDRESS_STYLES = 'text-text-sm text-deep-gray';
 
 const ProductMapModal = ({ isOpen, onClose, onSelectLocation }) => {
-  const mapContainer = useRef(null);
-  const [map, setMap] = useState(null);
-  const [currentMarker, setCurrentMarker] = useState(null);
-  const [address, setAddress] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState(null);
-
-  // 카카오맵 스크립트 로드 및 초기화
-  useEffect(() => {
-    if (!isOpen) return;
-
-    // 이미 스크립트가 로드되어 있는지 확인
-    if (window.kakao && window.kakao.maps) {
-      initializeMap();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=발급받은_API_키&libraries=services&autoload=false`;
-    document.head.appendChild(script);
-
-    script.onload = () => {
-      window.kakao.maps.load(() => {
-        initializeMap();
-      });
-    };
-
-    return () => {
-      // 모달이 닫힐 때 상태 초기화
-      setAddress('');
-      setSelectedLocation(null);
-    };
-  }, [isOpen]);
-
-  // 지도 초기화
-  const initializeMap = () => {
-    if (!mapContainer.current) return;
-
-    const options = {
-      center: new window.kakao.maps.LatLng(37.566826, 126.9786567), // 서울 시청
-      level: 3,
-    };
-
-    const mapInstance = new window.kakao.maps.Map(
-      mapContainer.current,
-      options,
-    );
-    setMap(mapInstance);
-
-    // 지도 클릭 이벤트 등록
-    window.kakao.maps.event.addListener(mapInstance, 'click', (mouseEvent) => {
-      handleMapClick(mouseEvent);
-    });
-  };
-
-  // 지도 클릭 이벤트 핸들러
-  const handleMapClick = (mouseEvent) => {};
-
-  // 주소 검색 함수
-  const searchAddress = () => {};
-
-  // 위치 선택 완료
-  const confirmLocation = () => {};
+  const {
+    address,
+    setAddress,
+    sendAddress,
+    handleLocationSelect,
+    searchAddress,
+    cancelLocation,
+    confirmLocation,
+    selectedLocation,
+    roadAddress,
+    lotAddress,
+  } = useProductMapModal({ isOpen, onClose, onSelectLocation });
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -105,6 +60,26 @@ const ProductMapModal = ({ isOpen, onClose, onSelectLocation }) => {
               leaveTo="opacity-0 scale-95"
             >
               <DialogPanel className="w-full max-w-md p-6 overflow-hidden transition-all transform bg-white shadow-xl rounded-2xl">
+                {/* X 표시 (닫기 버튼) 추가 */}
+                <button
+                  onClick={onClose}
+                  className="absolute p-1 transition-colors rounded-full top-4 right-4 hover:bg-gray-100"
+                  aria-label="닫기"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5 text-gray-500"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
                 <DialogTitle
                   as="h3"
                   className="mb-4 font-medium text-center text-title-sm text-deep-gray"
@@ -115,12 +90,11 @@ const ProductMapModal = ({ isOpen, onClose, onSelectLocation }) => {
                 {/* 검색창 */}
                 <div className="mb-4">
                   <div className="flex gap-2">
-                    <input
+                    <Input
                       type="text"
-                      placeholder="주소를 입력하세요"
+                      placeholder="도로명 주소를 입력하세요"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="flex-1 px-3 py-2 border rounded-lg border-gray focus:outline-none focus:ring-2 focus:ring-mint text-text-md"
                       onKeyDown={(e) => e.key === 'Enter' && searchAddress()}
                     />
                     <Button onClick={searchAddress}>검색</Button>
@@ -128,10 +102,14 @@ const ProductMapModal = ({ isOpen, onClose, onSelectLocation }) => {
                 </div>
 
                 {/* 카카오맵 */}
-                <div
-                  ref={mapContainer}
-                  className="w-full mb-4 border border-gray h-80 rounded-xl"
-                ></div>
+                <div className="w-full mb-4 border border-gray h-80 rounded-xl">
+                  <KakaoMap
+                    level={3}
+                    mode={MODE.LOCATIONPICKER}
+                    onLocationSelect={handleLocationSelect}
+                    sendAddress={sendAddress}
+                  />
+                </div>
 
                 {/* 선택된 위치 */}
                 {selectedLocation && (
@@ -139,16 +117,21 @@ const ProductMapModal = ({ isOpen, onClose, onSelectLocation }) => {
                     <h3 className="mb-1 font-medium text-text-md text-deep-gray">
                       선택한 위치
                     </h3>
-                    <p className="text-text-sm text-deep-gray">
-                      {selectedLocation.address}
+                    <p className={LOAD_ADDRESS_STYLES}>
+                      <span className="font-semibold">도로명 주소</span>:{' '}
+                      {roadAddress || '주소 정보 없음'}
+                    </p>
+                    <p className={LOAD_ADDRESS_STYLES}>
+                      <span className="font-semibold">지번 주소</span>:{' '}
+                      {lotAddress || '주소 정보 없음'}
                     </p>
                   </div>
                 )}
 
                 {/* 하단 버튼 */}
                 <div className="flex justify-end gap-2 mt-4">
-                  <Button variant="outline" onClick={onClose}>
-                    취소
+                  <Button variant="outline" onClick={cancelLocation}>
+                    초기화
                   </Button>
                   <Button
                     onClick={confirmLocation}
