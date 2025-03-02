@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Comments from '../components/comments/Comments';
 import { useParams } from 'react-router-dom';
 import useUserStore from '../store/userStore';
@@ -97,11 +97,9 @@ const ProductDetail = () => {
 
   // 판매자 정보 찾기
   const seller = users.find((user) => user.user_id === product.user_id);
-  console.log('seller>>>', seller);
 
   // 로그인 유저가 상품의 작성자인지 확인
   const isOwner = isLogin && currentUser?.id === product.user_id;
-  console.log('isOwner>>>', isOwner);
 
   return (
     <div>
