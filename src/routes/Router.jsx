@@ -9,46 +9,53 @@ import SignIn from '../pages/SignIn';
 import SignUp from '../pages/SignUp';
 import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
+import Layout from '../components/layout/Layout';
 
 const Router = () => {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <Main />,
-    },
-    {
-      path: '/product',
-      element: <ProductList />,
-    },
-    {
-      path: '/product/detail/:id',
-      element: <ProductDetail />,
-    },
-    // 로그인 했을 때만 접근 가능
-    {
-      element: <PrivateRoute />,
+      element: <Layout />,
       children: [
         {
-          path: '/product/registration',
-          element: <ProductRegistration />,
+          path: '/',
+          element: <Main />,
         },
         {
-          path: '/mypage',
-          element: <MyPage />,
-        },
-      ],
-    },
-    // 로그인 하지 않았을 때만 접근 가능
-    {
-      element: <PublicRoute />,
-      children: [
-        {
-          path: '/signin',
-          element: <SignIn />,
+          path: '/product',
+          element: <ProductList />,
         },
         {
-          path: '/signup',
-          element: <SignUp />,
+          path: '/product/detail/:id',
+          element: <ProductDetail />,
+        },
+        // 로그인 했을 때만 접근 가능
+        {
+          element: <PrivateRoute />,
+          children: [
+            {
+              path: '/product/registration',
+              element: <ProductRegistration />,
+            },
+            {
+              path: '/mypage',
+              element: <MyPage />,
+            },
+          ],
+        },
+        // 로그인 하지 않았을 때만 접근 가능
+        {
+          element: <PublicRoute />,
+          children: [
+            {
+              path: '/signin',
+              element: <SignIn />,
+            },
+            {
+              path: '/signup',
+              element: <SignUp />,
+            },
+          ],
         },
       ],
     },

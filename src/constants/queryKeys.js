@@ -3,4 +3,6 @@ export const QUERY_KEYS = {
   PRODUCT: {
     LIST: ['products'],
   },
+  // 유저 관련 쿼리 키
+  USER: ['user'],
 };

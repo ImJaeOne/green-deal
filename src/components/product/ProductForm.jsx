@@ -32,8 +32,6 @@ const ProductForm = ({ product, onChangeProduct, onSubmit }) => {
 
   // input focus 이벤트 핸들러
   const autoFocusHandler = () => {
-    console.log(name, price);
-
     if (!name) {
       return nameInputRef.current.focus();
     }

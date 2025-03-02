@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { productService } from '../service/productService';
 import { QUERY_KEYS } from '../constants/queryKeys';
+import { addProduct } from '../api/productService';
 
 /**
  * useAddProduct
@@ -13,7 +13,7 @@ import { QUERY_KEYS } from '../constants/queryKeys';
 export const useAddProduct = (product, userId, onSuccess) => {
   const queryClient = useQueryClient();
   const { mutate, isLoading, error } = useMutation({
-    mutationFn: () => productService(product, userId),
+    mutationFn: () => addProduct(product, userId),
     onSuccess: (data) => {
       queryClient.invalidateQueries(QUERY_KEYS.PRODUCT.LIST);
       if (onSuccess) onSuccess(data);

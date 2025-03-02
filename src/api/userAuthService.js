@@ -42,7 +42,6 @@ export const authSignOut = async () => {
     throw new Error(`로그아웃 실패: ${error.message}`);
   }
 };
-
 export const authGoogleSignIn = async () => {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
