@@ -23,9 +23,10 @@ const addComment = async ({ productId, content, userId }) => {
   const { data, error } = await supabase
     .from('comments')
     .insert([{ content, user_id: userId, product_id: productId }])
-    .select();
+    .select()
+    .single();
   if (error) throw new Error(error.message);
-  return data[0];
+  return data;
 };
 
 // 댓글 수정
