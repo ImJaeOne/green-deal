@@ -13,7 +13,7 @@ const MypageProductList = ({ currentTab, user }) => {
     user?.id,
   );
 
-  const { mutate: removeWishMutation } = useRemoveWish();
+  const { mutate: removeWishMutation } = useRemoveWish(user?.id);
 
   const getFilteredItems = () => {
     if (!products || !wishlist) return [];
@@ -34,7 +34,11 @@ const MypageProductList = ({ currentTab, user }) => {
       {
         buttonName: '삭제',
         variant: 'outline',
-        onClick: removeProductMutation,
+        onClick: (productId) => {
+          if (window.confirm('상품을 삭제하시겠습니까?')) {
+            removeProductMutation(productId);
+          }
+        },
       },
       {
         buttonName: '수정',
@@ -48,14 +52,22 @@ const MypageProductList = ({ currentTab, user }) => {
       {
         buttonName: '삭제',
         variant: 'outline',
-        onClick: removeProductMutation,
+        onClick: (productId) => {
+          if (window.confirm('상품을 삭제하시겠습니까?')) {
+            removeProductMutation(productId);
+          }
+        },
       },
     ],
     wishlist: [
       {
         buttonName: '찜해제',
         variant: 'outline',
-        onClick: removeWishMutation,
+        onClick: (wishId) => {
+          if (window.confirm('찜해제 하시겠습니까?')) {
+            removeWishMutation(wishId);
+          }
+        },
       },
     ],
   };
@@ -124,9 +136,11 @@ const MypageProductList = ({ currentTab, user }) => {
                   type="button"
                   variant={variant}
                   size="medium"
-                  onClick={() =>
-                    onClick(currentTab === 'wishlist' ? item.wishId : item.id)
-                  }
+                  onClick={() => {
+                    const id =
+                      currentTab === 'wishlist' ? item.wishId : item.id;
+                    onClick(id);
+                  }}
                   className={
                     currentTab === 'sold' || currentTab === 'wishlist'
                       ? 'w-full'
