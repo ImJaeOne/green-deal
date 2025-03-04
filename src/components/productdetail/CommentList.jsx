@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
 import Button from '../common/Button';
 import useUserStore from '../../store/userStore';
-import { useQueryClient } from '@tanstack/react-query';
+import { useDeleteComment, useUpdateComment } from '../../hooks/useComment';
 
-const CommentList = ({
-  comments,
-  seller,
-  updateCommentMutation,
-  deleteCommentMutation,
-}) => {
-  const queryClient = useQueryClient();
-
+const CommentList = ({ comments, seller, productId }) => {
   // 현재 로그인한 사용자 정보 가져오기
   const currentUser = useUserStore((state) => state.user);
   const [editingCommentId, setEditingCommentId] = useState(null); //현재 수정 중인 댓글 id 상태
   const [editContent, setEditContent] = useState(''); // 수정할 댓글 내용 상태
+
+  // 댓글 수정
+  const updateCommentMutation = useUpdateComment(productId);
+  // 댓글 삭제
+  const deleteCommentMutation = useDeleteComment(productId);
 
   // 댓글 수정 클릭시 호출
   const handleEdit = (comment) => {
@@ -59,7 +57,7 @@ const CommentList = ({
             <li
               key={comment.id}
               className={`p-4 border rounded-lg border-light-gray ${
-                isProductOwnerComment && ' bg-light-mint'
+                isProductOwnerComment && ' bg-light-gray'
               }`}
             >
               <div className="flex justify-between gap-3">
@@ -78,7 +76,7 @@ const CommentList = ({
                       </h3>
 
                       {/* 작성날짜 */}
-                      <span className="text-xs text-gray">
+                      <span className="text-xs text-deep-gray">
                         {new Date(comment.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -88,7 +86,7 @@ const CommentList = ({
                       <textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="w-full p-2 text-sm border rounded-md"
+                        className="w-full p-2 text-sm rounded-md focus:ring-1 focus:ring-mint focus:outline-none"
                       />
                     ) : (
                       <p className="text-sm text-deep-gray">

@@ -65,8 +65,8 @@ const ProductDetail = () => {
   const isOwner = isLogin && currentUser?.id === product.user_id;
 
   return (
-    <div className="w-7xl">
-      <div className="flex gap-12 p-8 mx-auto bg-white h-[860px]">
+    <div className="mx-auto max-w-7xl">
+      <div className="flex gap-12 p-8 mx-auto bg-white h-[860px">
         {/* 상품 이미지 */}
         <div className="flex items-center justify-center p-6 w-[580px] bg-light-gray">
           <img

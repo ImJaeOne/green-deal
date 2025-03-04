@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import useUserStore from '../../store/userStore';
-import { supabase } from '../../api/client';
 import Button from '../common/Button';
+import { useAddComment } from '../../hooks/useComment';
 
-const CommentForm = ({ productId, addCommentMutation }) => {
+const CommentForm = ({ productId }) => {
   // 로그인한 유저 정보
   const currentUser = useUserStore((state) => state.user);
   const [content, setContent] = useState('');
+
+  // 댓글 추가
+  const addCommentMutation = useAddComment(productId);
 
   //댓글 추가 로직
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!content) return;
+    if (!content.trim()) return;
 
     addCommentMutation.mutate({ content });
     setContent('');
