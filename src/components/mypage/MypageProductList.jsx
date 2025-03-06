@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import { useUserProducts } from '../../hooks/useProduct';
 import { useRemoveWish, useUserWishlist } from '../../hooks/useWish';
+import Loading from '../common/Loading';
 const MypageProductList = ({ currentTab, user }) => {
   const navigate = useNavigate();
 
